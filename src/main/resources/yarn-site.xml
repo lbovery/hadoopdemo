@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<!--
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License. See accompanying LICENSE file.
+-->
+<configuration>
+
+    <!--开启resourcemanagerHA,默认为false -->
+
+    <property>
+        <name>yarn.resourcemanager.ha.enabled</name>
+        <value>true</value>
+    </property>
+
+    <!--开启自动恢复功能 -->
+    <property>
+        <name>yarn.resourcemanager.recovery.enabled</name>
+        <value>true</value>
+    </property>
+
+    <!-- 指定RM的cluster id -->
+
+    <property>
+        <name>yarn.resourcemanager.cluster-id</name>
+        <value>yrc</value>
+    </property>
+
+    <property>　
+        <name>yarn.resourcemanager.ha.id</name>　　
+        <value>rm1</value>　　　
+        <description>If we want to launch more than one RM in single node,we need this configuration</description>
+    </property>
+
+    <!--配置resourcemanager -->
+
+    <property>
+        <name>yarn.resourcemanager.ha.rm-ids</name>
+        <value>rm1,rm2</value>
+    </property>
+
+    <!-- 分别指定RM的地址 -->
+
+    <property>
+        <name>yarn.resourcemanager.hostname.rm1</name>
+        <value>hadoop01</value>
+    </property>
+
+    <property>
+        <name>yarn.resourcemanager.hostname.rm2</name>
+        <value>hadoop02</value>
+    </property>
+
+    <!-- <property> <name>yarn.resourcemanager.ha.id</name> <value>rm1</value>
+
+     <description>If we want to launch more than one RM in single node,we need
+
+     this configuration</description> </property> -->
+
+    <!-- 指定zk集群地址 -->
+
+    <property>
+        <name>ha.zookeeper.quorum</name>
+        <value>hadoop03,hadoop04,hadoop05</value>
+    </property>
+
+    <!--配置与zookeeper的连接地址-->
+
+    <property>
+        <name>yarn.resourcemanager.zk-state-store.address</name>
+        <value>hadoop03:2181,hadoop04:2181,hadoop05:2181</value>
+    </property>
+
+    <property>
+        <name>yarn.resourcemanager.store.class</name>
+        <value>org.apache.hadoop.yarn.server.resourcemanager.recovery.ZKRMStateStore
+        </value>
+    </property>
+
+    <property>
+        <name>yarn.resourcemanager.zk-address</name>
+        <value>hadoop03:2181,hadoop04:2181,hadoop05:2181</value>
+    </property>
+
+    <property>
+        <name>yarn.resourcemanager.ha.automatic-failover.zk-base-path</name>
+        <value>/yarn-leader-election</value>
+        <description>Optionalsetting.Thedefaultvalueis/yarn-leader-election</description>
+    </property>
+    <property>
+        <name>yarn.nodemanager.aux-services</name>
+        <value>mapreduce_shuffle</value>
+    </property>
+
+<!-- Site specific YARN configuration properties -->
+
+</configuration>
