@@ -119,7 +119,7 @@ public class HBaseDemo {
         Scan scan = new Scan();
         //使用HTable得到resultcanner实现类的对象
         ResultScanner resultScanner = table.getScanner(scan);
-        for (Result result : resultScanner) {
+        resultScanner.forEach(result -> {
             Cell[] cells = result.rawCells();
             for (Cell cell : cells) {
                 //得到rowKey
@@ -128,7 +128,7 @@ public class HBaseDemo {
                 LOGGER.info("列族:列 == [{}:{}] = [{}]", Bytes.toString(CellUtil.cloneFamily(cell)), Bytes.toString(CellUtil.cloneQualifier(cell)),
                         Bytes.toString(CellUtil.cloneValue(cell)));
             }
-        }
+        });
     }
 
     /**
