@@ -38,6 +38,36 @@ public class HBaseDemo {
         connection = ConnectionFactory.createConnection(configuration);
     }
 
+    //创建命名空间
+    public static void createNamespace(String name) throws IOException {
+        Admin admin = connection.getAdmin();
+        NamespaceDescriptor namespaceDescriptor = NamespaceDescriptor.create(name).build();
+        admin.createNamespace(namespaceDescriptor);
+        admin.close();
+    }
+
+    public static void createTable(String tableName, int version, String... columnFamily) throws IOException {
+        //判断表是否存在
+        if (isTableExist(tableName)) {
+            System.out.println("表" + tableName + "已存在");
+            //System.exit(0);
+        } else {
+            //创建表属性对象,表名需要转字节
+            HTableDescriptor descriptor = new HTableDescriptor(TableName.valueOf(tableName));
+            //创建多个列族
+            for (String cf : columnFamily) {
+                HColumnDescriptor columnDescriptor = new HColumnDescriptor(cf);
+                columnDescriptor.setMaxVersions(version);
+                descriptor.addFamily(columnDescriptor);
+            }
+            //根据对表的配置，创建表
+            Admin admin = connection.getAdmin();
+            admin.createTable(descriptor);
+            admin.close();
+            LOGGER.info("表 [{}] 创建成功！", tableName);
+        }
+    }
+
     public static void createTable(String tableName, String... columnFamily) throws IOException {
         //判断表是否存在
         if (isTableExist(tableName)) {
@@ -135,15 +165,20 @@ public class HBaseDemo {
      * 获取指定行数据
      */
     public static void getRow(String tableName, String rowKey) throws IOException {
-        Table table = connection.getTable(TableName.valueOf(tableName));
-        Get get = new Get(Bytes.toBytes(rowKey));
-        //get.setMaxVersions();显示所有版本
-        //get.setTimeStamp();显示指定时间戳的版本
-        Result result = table.get(get);
+        Result result = getRowResult(tableName, rowKey);
         for (Cell cell : result.rawCells()) {
             LOGGER.info("列族:列:行键 == [{}:{}:{}] = [{}], [{}]", Bytes.toString(CellUtil.cloneFamily(cell)), Bytes.toString(CellUtil.cloneQualifier(cell)),
                     Bytes.toString(result.getRow()), Bytes.toString(CellUtil.cloneValue(cell)), cell.getTimestamp());
         }
+    }
+
+    public static Result getRowResult(String tableName, String rowKey) throws IOException {
+        Table table = connection.getTable(TableName.valueOf(tableName));
+        Get get = new Get(Bytes.toBytes(rowKey));
+        //get.setMaxVersions();显示所有版本
+        //get.setTimeStamp();显示指定时间戳的版本
+        return table.get(get);
+
     }
 
     /**

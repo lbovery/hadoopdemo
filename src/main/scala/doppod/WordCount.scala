@@ -1,6 +1,8 @@
 package doppod
 
 import org.apache.spark.rdd.RDD
+import org.apache.spark.streaming.dstream.ReceiverInputDStream
+import org.apache.spark.streaming.{Seconds, StreamingContext}
 import org.apache.spark.{SparkConf, SparkContext}
 
 /**
@@ -13,15 +15,68 @@ class WordCount {
 
 object WordCount {
   def main(args: Array[String]): Unit = {
-    val sc = new SparkContext(new SparkConf().setAppName("WC").setMaster("local[*]"))
+        val sc = new SparkContext(new SparkConf().setAppName("WC").setMaster("local[*]"))
     //创建SparkConf并设置App名称
     //    val file = "D:\\3.sql"
     //    val tuples: Array[(String, Int)] = sc.textFile(file).flatMap(_.split(" ")).map((_, 1)).reduceByKey(_ + _, 1)
     //      .sortBy(_._2, ascending = false).collect()
     //    tuples.take(5).foreach(println)
-    test3(sc)
+    test1(sc)
     //    test2(sc)
   }
+
+
+  /**
+    * 有状态转换
+    *
+    */
+  def test5(sc: SparkContext): Unit = {
+    val conf = new SparkConf().setMaster("local[*]").setAppName("NetworkWordCount")
+    val ssc = new StreamingContext(conf, Seconds(5))
+    ssc.checkpoint("file:///check")
+    // Create a DStream that will connect to hostname:port, like localhost:9999
+    val lines: ReceiverInputDStream[String] = ssc.socketTextStream("localhost", 9999)
+
+    // Split each line into words
+    val words = lines.flatMap(_.split(""))
+
+    val pairs = words.map(word => (word, 1))
+
+    val wordCounts = pairs.updateStateByKey((seq: Seq[Int], state: Option[Int]) => Some(state.getOrElse(0) + seq.sum))
+
+    // Print the first ten elements of each RDD generated in this DStream to the console
+    wordCounts.print()
+
+    ssc.start() // Start the computation
+    ssc.awaitTermination() // Wait for the computation to terminate
+
+  }
+
+  /**
+    * 测试spark stream
+    */
+  def test4(sc: SparkContext): Unit = {
+    val conf = new SparkConf().setMaster("local[*]").setAppName("NetworkWordCount")
+    val ssc = new StreamingContext(conf, Seconds(1))
+    // Create a DStream that will connect to hostname:port, like localhost:9999
+    val lines = ssc.socketTextStream("localhost", 9999)
+
+    // Split each line into words
+    val words = lines.flatMap(_.split(""))
+
+    //import org.apache.spark.streaming.StreamingContext._ // not necessary since Spark 1.3
+    // Count each word in each batch
+    val pairs = words.map(word => (word, 1))
+    val wordCounts = pairs.reduceByKey(_ + _)
+
+    // Print the first ten elements of each RDD generated in this DStream to the console
+    wordCounts.print()
+
+    ssc.start() // Start the computation
+    ssc.awaitTermination() // Wait for the computation to terminate
+
+  }
+
 
   /**
     * combineByKey 方法
