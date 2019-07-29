@@ -7,6 +7,10 @@
     <value>hdfs://hadoop202:8020/hbase</value>
   </property>
   <property>
+    <name>hbase.replication</name>
+    <value>true</value>
+  </property>
+  <property>
     <name>hbase.client.write.buffer</name>
     <value>2097152</value>
   </property>
@@ -100,7 +104,7 @@
   </property>
   <property>
     <name>hbase.zookeeper.quorum</name>
-    <value>hadoop202,hadoop203,hadoop201</value>
+    <value>hadoop203,hadoop201,hadoop202</value>
   </property>
   <property>
     <name>hbase.zookeeper.property.clientPort</name>
